@@ -11,14 +11,14 @@ X = veriseti[["Category", "Page total likes", "Post Month", "Post Hour", "Post W
 
 Y = veriseti["Total Interactions"].values# bağımlı değişkenler-- tek sütün olduğundan daha rahat çağırmak adına tek boyutlu dizi haline getirildi
 
-print(X.iloc[0])
-print(Y[0])
+
 
 scaler = StandardScaler() # aykırı değerler yerine aralığı daha sabit verilere geçmek adına bağımsız değişkenler normalize edilir
 #scaler= MinMaxScaler# kodun işleyişine göre diğer bir normalize işlemi uygulanacak
 X_scaled = scaler.fit_transform(X)
 
-
+bias=50
+kayip_egitim_toplam=0
 
 X_egitim, X_test, y_egitim, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
 
@@ -31,61 +31,55 @@ def En_Kucuk_Kare(y_egitim,tahmin,sıra,kayip_egitim_toplam=0):
     
     return kayip_egitim_toplam,kayip_egitim
 
-def gradyan_inisi(agirliklar,ogrenme_katsayısı,tahmin_dizi,bagimsiz_sayi,iterasyon_sayisi,gercek_deger):
-        sonuc=dizi_cikarim(y_egitim,tahmin_dizi)
-        agirlik_maliyet = -(2/bagimsiz_sayi) * np.sum(np.multiply(X_egitim,sonuc))
-        bias_maliyet = -(2/bagimsiz_sayi) *np.sum(sonuc)
-         
-        # Updating weights and bias
-        agirliklar = agirliklar - (ogrenme_katsayısı * agirlik_maliyet)
+def gradyan_inisi(agirlik,ogrenme_katsayısı,tahmin,anlik_ornek_sayisi,gercek_deger,bias,toplam_ornek_sayisi):
+        kayip=gercek_deger-tahmin
+        agirlik_türev = (2/toplam_ornek_sayisi) * X_egitim.iloc[anlik_ornek_sayisi]*kayip
+        bias_maliyet = (2/toplam_ornek_sayisi) *kayip
+       
+        
+        
+        agirlik = agirlik - (ogrenme_katsayısı * agirlik_türev)# stokastik gradyan inisi formülü
         bias = bias - (ogrenme_katsayısı * bias_maliyet)
-
-        """"Buraya gradyan düşüşü kodları yazılacak 
-        for ile tek tek çağırmak yerine dizi olarak işlemlere bakılacak 
-
-        ayrıca gradyan düşüşü formülü uygulanmasına bakılacak"""
+        print(f"kayip:{kayip}")
+        return agirlik,bias 
 
 
 
-#weight_derivative = -(2/n) * sum(x * (y-y_predicted))
-#bias_derivative = -(2/n) * sum(y-y_predicted)
-         
-        # Updating weights and bias
-#current_weight = current_weight - (learning_rate * weight_derivative)
-#current_bias = current_bias - (learning_rate * bias_derivative)
-
-#w = w - (learning_rate * (dJ/dw))
-#b = b - (learning_rate * (dJ/db))
 
 
 
 def lineer_regresyon(X_egitim,y_egitim,ogrenme_katsayısı,iterasyon,bagimsiz_sayi):
-    agirliklar=np.array([0,0,0,0,0,0])# ağırlıkla için dizi oluşturuldu
+    agirliklar=np.array([])# ağırlıkla için dizi oluşturuldu
     for i in range (0,bagimsiz_sayi):
-        agirliklar[i]=np.random.randint(30)# rastgele ağırlıklar atandı
-        print(agirliklar)##############################################################################################
+        agirliklar=np.append(agirliklar,np.random.randint(30))# rastgele ağırlıklar atandı
+        
         bias=50#bias değeri 50 olarak başlatıldı
 
     for i in range (1,iterasyon+1):
+        tahmin_dizi=np.array([])
         for k in range(0,len(X_egitim)):
             tahmin=np.dot(X_egitim.iloc[0],agirliklar)+bias # regresyon formülü uygulanır bağımsız değişkenler ağırlık ile çarpılır
-            tahmin_dizi=np.array([])
-            tahmin_dizi[i]=tahmin
-            kayip_egitim,kayip_egitim_toplam=En_Kucuk_Kare(kayip_egitim_toplam=kayip_egitim_toplam)
-            if k==len(X_egitim):# iterasyon biter ve kare hata kaydedilir
-                kayip_egitim_kayit=np.array([])
-                kayip_egitim_kayit[i]=kayip_egitim# her bir iterasyonda dizinin indisi ile aynı sayı olacak şekilde kaydedilir
-        agirliklar=gradyan_inisi(agirliklar,ogrenme_katsayısı,tahmin_dizi,bagimsiz_sayi,i,y_egitim)
+            
+            tahmin_dizi=np.append(tahmin_dizi,tahmin)
+            #kayip_egitim,kayip_egitim_toplam=En_Kucuk_Kare(kayip_egitim_toplam=kayip_egitim_toplam)
+            
+            #kayip_egitim_kayit=np.array([])
+            #kayip_egitim_kayit[i]=kayip_egitim# her bir iterasyonda dizinin indisi ile aynı sayı olacak şekilde kaydedilir
+            agirliklar,bias=gradyan_inisi(agirlik=agirliklar,ogrenme_katsayısı=ogrenme_katsayısı,tahmin=tahmin,toplam_ornek_sayisi=len(X_egitim),anlik_ornek_sayisi=k,gercek_deger=y_egitim[k],bias=bias)
+        for j in range(X_egitim):
+            a=(tahmin_dizi[j]-y_egitim[j]/y_egitim)*100
+            print("yüzde_hata->",a)
 
 
+    return agirliklar,bias    
 
 
-def dizi_cikarim(dizi1,dizi2):
+"""def dizi_cikarim(dizi1,dizi2):
     sonuc=np.array([])
     for i in range(0,len(dizi1)-1):
           sonuc[i]=dizi1[i]-dizi2[i]
           
-    return sonuc
+    return sonuc"""
 
-
+lineer_regresyon(X_egitim=X_egitim,y_egitim=y_egitim,ogrenme_katsayısı=0.1,iterasyon=10,bagimsiz_sayi=len(X_egitim.iloc[0]),)
 
