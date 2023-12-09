@@ -17,12 +17,16 @@ scaler = StandardScaler() # aykırı değerler yerine aralığı daha sabit veri
 #scaler= MinMaxScaler# kodun işleyişine göre diğer bir normalize işlemi uygulanacak
 X_scaled = scaler.fit_transform(X)
 
-bias=50
+bias=0
 kayip_egitim_toplam=0
 
-X_egitim, X_test, y_egitim, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+X_egitim, X_test, y_egitim, y_test = train_test_split(X_scaled, Y, test_size=0.2, random_state=42)
 
-bagimsiz_sayi=X.iloc[0].size # bağımsız değişkenlerin sayısı elde edildi
+
+bagimsiz_sayi=len(X.iloc[0]) # bağımsız değişkenlerin sayısı elde edildi
+toplam_ornek_sayisi_egitim=400
+toplam_ornek_sayisi_test=100
+
 
 def En_Kucuk_Kare(y_egitim,tahmin,sıra,kayip_egitim_toplam=0):
     kayip_egitim_toplam=(y_egitim[sıra]-tahmin)**2# en küçük kareler kayıp fonksiyonu hesaplandı
@@ -33,14 +37,14 @@ def En_Kucuk_Kare(y_egitim,tahmin,sıra,kayip_egitim_toplam=0):
 
 def gradyan_inisi(agirlik,ogrenme_katsayısı,tahmin,anlik_ornek_sayisi,gercek_deger,bias,toplam_ornek_sayisi):
         kayip=gercek_deger-tahmin
-        agirlik_türev = (2/toplam_ornek_sayisi) * X_egitim.iloc[anlik_ornek_sayisi]*kayip
+        agirlik_türev = (2/toplam_ornek_sayisi) * X_egitim[anlik_ornek_sayisi]*kayip
         bias_maliyet = (2/toplam_ornek_sayisi) *kayip
-       
+    
         
         
         agirlik = agirlik - (ogrenme_katsayısı * agirlik_türev)# stokastik gradyan inisi formülü
         bias = bias - (ogrenme_katsayısı * bias_maliyet)
-        print(f"kayip:{kayip}")
+        #print(f"kayip:{kayip}")
         return agirlik,bias 
 
 
@@ -57,18 +61,20 @@ def lineer_regresyon(X_egitim,y_egitim,ogrenme_katsayısı,iterasyon,bagimsiz_sa
 
     for i in range (1,iterasyon+1):
         tahmin_dizi=np.array([])
-        for k in range(0,len(X_egitim)):
-            tahmin=np.dot(X_egitim.iloc[0],agirliklar)+bias # regresyon formülü uygulanır bağımsız değişkenler ağırlık ile çarpılır
+        
+        for k in range(0,toplam_ornek_sayisi_egitim):
+            tahmin=np.dot(X_egitim[k],agirliklar)+bias # regresyon formülü uygulanır bağımsız değişkenler ağırlık ile çarpılır
+            
+                
+                 
             
             tahmin_dizi=np.append(tahmin_dizi,tahmin)
             #kayip_egitim,kayip_egitim_toplam=En_Kucuk_Kare(kayip_egitim_toplam=kayip_egitim_toplam)
             
             #kayip_egitim_kayit=np.array([])
             #kayip_egitim_kayit[i]=kayip_egitim# her bir iterasyonda dizinin indisi ile aynı sayı olacak şekilde kaydedilir
-            agirliklar,bias=gradyan_inisi(agirlik=agirliklar,ogrenme_katsayısı=ogrenme_katsayısı,tahmin=tahmin,toplam_ornek_sayisi=len(X_egitim),anlik_ornek_sayisi=k,gercek_deger=y_egitim[k],bias=bias)
-        for j in range(X_egitim):
-            a=(tahmin_dizi[j]-y_egitim[j]/y_egitim)*100
-            print("yüzde_hata->",a)
+            agirliklar,bias=gradyan_inisi(agirlik=agirliklar,ogrenme_katsayısı=ogrenme_katsayısı,tahmin=tahmin,toplam_ornek_sayisi=toplam_ornek_sayisi_egitim,anlik_ornek_sayisi=k,gercek_deger=y_egitim[k],bias=bias)
+        print(f"tahmin={tahmin}\n bagimsiz degiskenler{X_egitim[k]}\n agirliklar={agirliklar} \n\n\n\n gercek={y_egitim[k]}")
 
 
     return agirliklar,bias    
@@ -81,5 +87,5 @@ def lineer_regresyon(X_egitim,y_egitim,ogrenme_katsayısı,iterasyon,bagimsiz_sa
           
     return sonuc"""
 
-lineer_regresyon(X_egitim=X_egitim,y_egitim=y_egitim,ogrenme_katsayısı=0.1,iterasyon=10,bagimsiz_sayi=len(X_egitim.iloc[0]),)
+lineer_regresyon(X_egitim=X_egitim,y_egitim=y_egitim,ogrenme_katsayısı=0.01,iterasyon=1000,bagimsiz_sayi=bagimsiz_sayi)
 
