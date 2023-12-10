@@ -28,31 +28,28 @@ toplam_ornek_sayisi_egitim=400
 toplam_ornek_sayisi_test=100
 
 
-def En_Kucuk_Kare(y_egitim,tahmin,sıra,kayip_egitim_toplam=0):
-    kayip_egitim_toplam=(y_egitim[sıra]-tahmin)**2# en küçük kareler kayıp fonksiyonu hesaplandı
+def En_Kucuk_Kare(y_egitim,tahmin,sira,kayip_egitim_toplam=0):
+    kayip_egitim_toplam=(y_egitim[sira]-tahmin)**2# en küçük kareler kayıp fonksiyonu hesaplandı
     kayip_egitim_toplam+=kayip_egitim_toplam# toplamları alındı
-    kayip_egitim=kayip_egitim_toplam/sıra # gradyan düşüşünde uygulanmak için ortalaması hesaplandı
+    kayip_egitim=kayip_egitim_toplam/sira # gradyan düşüşünde uygulanmak için ortalaması hesaplandı
     
     return kayip_egitim_toplam,kayip_egitim
 
-def gradyan_inisi(agirlik,ogrenme_katsayısı,tahmin,anlik_ornek_sayisi,gercek_deger,bias,toplam_ornek_sayisi):
+def gradyan_inisi(agirlik,ogrenme_katsayisi,tahmin,anlik_ornek_sayisi,gercek_deger,bias,toplam_ornek_sayisi):
         kayip=gercek_deger-tahmin
-        agirlik_türev = (2/toplam_ornek_sayisi) * X_egitim[anlik_ornek_sayisi]*kayip
-        bias_maliyet = (2/toplam_ornek_sayisi) *kayip
+        agirlik_turev = -(2/toplam_ornek_sayisi) * X_egitim[anlik_ornek_sayisi]*kayip
+        bias_maliyet = -(2/toplam_ornek_sayisi) *kayip
     
         
         
-        agirlik = agirlik - (ogrenme_katsayısı * agirlik_türev)# stokastik gradyan inisi formülü
-        bias = bias - (ogrenme_katsayısı * bias_maliyet)
+        agirlik = agirlik - (ogrenme_katsayisi * agirlik_turev)# stokastik gradyan inisi formülü
+        bias = bias - (ogrenme_katsayisi * bias_maliyet)
         #print(f"kayip:{kayip}")
         return agirlik,bias 
 
 
 
-
-
-
-def lineer_regresyon(X_egitim,y_egitim,ogrenme_katsayısı,iterasyon,bagimsiz_sayi):
+def lineer_regresyon(X_egitim,y_egitim,ogrenme_katsayisi,iterasyon,bagimsiz_sayi):
     agirliklar=np.array([])# ağırlıkla için dizi oluşturuldu
     for i in range (0,bagimsiz_sayi):
         agirliklar=np.append(agirliklar,np.random.randint(30))# rastgele ağırlıklar atandı
@@ -73,7 +70,7 @@ def lineer_regresyon(X_egitim,y_egitim,ogrenme_katsayısı,iterasyon,bagimsiz_sa
             
             #kayip_egitim_kayit=np.array([])
             #kayip_egitim_kayit[i]=kayip_egitim# her bir iterasyonda dizinin indisi ile aynı sayı olacak şekilde kaydedilir
-            agirliklar,bias=gradyan_inisi(agirlik=agirliklar,ogrenme_katsayısı=ogrenme_katsayısı,tahmin=tahmin,toplam_ornek_sayisi=toplam_ornek_sayisi_egitim,anlik_ornek_sayisi=k,gercek_deger=y_egitim[k],bias=bias)
+            agirliklar,bias=gradyan_inisi(agirlik=agirliklar,ogrenme_katsayisi=ogrenme_katsayisi,tahmin=tahmin,toplam_ornek_sayisi=toplam_ornek_sayisi_egitim,anlik_ornek_sayisi=k,gercek_deger=y_egitim[k],bias=bias)
         print(f"tahmin={tahmin}\n bagimsiz degiskenler{X_egitim[k]}\n agirliklar={agirliklar} \n\n\n\n gercek={y_egitim[k]}")
 
 
@@ -87,5 +84,5 @@ def lineer_regresyon(X_egitim,y_egitim,ogrenme_katsayısı,iterasyon,bagimsiz_sa
           
     return sonuc"""
 
-lineer_regresyon(X_egitim=X_egitim,y_egitim=y_egitim,ogrenme_katsayısı=0.01,iterasyon=1000,bagimsiz_sayi=bagimsiz_sayi)
+lineer_regresyon(X_egitim=X_egitim,y_egitim=y_egitim,ogrenme_katsayisi=0.01,iterasyon=1000,bagimsiz_sayi=bagimsiz_sayi)
 
