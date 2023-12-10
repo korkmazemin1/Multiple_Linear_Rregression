@@ -1,1 +1,1 @@
-k
+hata_ortalama

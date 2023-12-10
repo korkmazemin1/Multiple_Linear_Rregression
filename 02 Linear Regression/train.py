@@ -1,43 +1,27 @@
-import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn import datasets
-import matplotlib.pyplot as plt
-from LinearRegression import LinearRegression
-import pandas as pd
+import numpy as np 
+X_egitim=np.array([1,2,3])
+kayip_dizi=np.array([1,2,3])
+agirlik=np.array([1,2,3])
+bias=5
+tahmin=np.array([1,2,3])
+gercek_deger=np.array([1,2,3])
+ogrenme_katsayisi=1
+toplam_ornek_sayisi=3
+def gradyan_inisi(agirlik,ogrenme_katsayisi,tahmin,gercek_deger,bias,toplam_ornek_sayisi,kayip_dizi):
+        
+        agirlik_turev = -(2/toplam_ornek_sayisi) * X_egitim*kayip_dizi
+        bias_maliyet = -(2/toplam_ornek_sayisi) *kayip_dizi
+        print(f"agirlik_türev:{agirlik_turev}\n agirlik:{agirlik}")
+        
+        
+        
+        
+        agirlik = agirlik - (ogrenme_katsayisi * agirlik_turev)# stokastik gradyan inisi formülü
+        print(f"agirlik_degisim:{agirlik}")
+        bias = bias - (ogrenme_katsayisi * bias_maliyet)
+        #print(f"kayip:{kayip}")
+        return agirlik,bias 
 
-facebook_data = pd.read_csv("dataset_Facebook.csv", sep=";")# dataset okundu
+agirlik,bias=gradyan_inisi(agirlik=agirlik,ogrenme_katsayisi=ogrenme_katsayisi,tahmin=tahmin,gercek_deger=gercek_deger,bias=bias,toplam_ornek_sayisi=toplam_ornek_sayisi,kayip_dizi=kayip_dizi)
 
-X=facebook_data[["Category","Page total likes","Post Month","Post Hour","Post Weekday","Paid"]].values# bağımsız değişkenler X ile belirtildi
-
-Y=facebook_data[["Total Interactions"]].values# bağımlı değişken belirlendi
-print("y: ",Y)
-print("X:",X)
-print(type(X))
-
-
-"""
-
-X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)#veriler test ve eğitim verileri olarak ayrıldı
-
-fig = plt.figure(figsize=(8,6))
-plt.scatter(X[:, 0], Y, color = "b", marker = "o", s = 30)
-plt.show()
-
-reg = LinearRegression(lr=0.01)
-reg.fit(X_train,y_train)
-predictions = reg.predict(X_test)
-
-def mse(y_test, predictions):
-    return np.mean((y_test-predictions)**2)
-
-mse = mse(y_test, predictions)
-print(mse)
-
-y_pred_line = reg.predict(X)
-cmap = plt.get_cmap('viridis')
-fig = plt.figure(figsize=(8,6))
-m1 = plt.scatter(X_train, y_train, color=cmap(0.9), s=10)
-m2 = plt.scatter(X_test, y_test, color=cmap(0.5), s=10)
-plt.plot(X, y_pred_line, color='black', linewidth=2, label='Prediction')
-plt.show()
-"""
+print(agirlik,bias)

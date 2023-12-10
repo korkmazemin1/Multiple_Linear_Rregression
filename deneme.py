@@ -78,6 +78,7 @@ class LinearRegressionFromScratch:
 
             # Gradient descent ile güncelleme
             self.weights -= (self.learning_rate / m) * np.dot(X.T, errors)
+            print(X)
             self.bias -= (self.learning_rate / m) * np.sum(errors)
 
     def predict(self, X):
@@ -102,18 +103,18 @@ X_scaled = scaler.fit_transform(X)
 X_egitim, X_test, y_egitim, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
 
 # Modeli oluştur
-model = LinearRegressionFromScratch(learning_rate=0.0001, num_iterations=6000)
+model = LinearRegressionFromScratch(learning_rate=0.0001, num_iterations=2)
 
 # Veriyi modele uyum sağla
 model.fit(X_egitim, y_egitim)
 
 # Eğitilmiş modelin ağırlıklarını ve bias'ını göster
-print("Eğitilmiş Ağırlıklar:", model.weights)
-print("Eğitilmiş Bias:", model.bias)
+#print("Eğitilmiş Ağırlıklar:", model.weights)
+#print("Eğitilmiş Bias:", model.bias)
 
 # Test verisi üzerinde modeli değerlendir
 tahmin_test = model.predict(X_test)
-print("Tahminler:", tahmin_test)
+#print("Tahminler:", tahmin_test)
 
 yuzde_benzerlik = benzerlik_yuzdesi(y_test, tahmin_test)
-print(f"Yüzde Benzerlik: {yuzde_benzerlik}%")
+#print(f"Yüzde Benzerlik: {yuzde_benzerlik}%")
