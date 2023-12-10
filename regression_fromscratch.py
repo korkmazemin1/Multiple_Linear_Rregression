@@ -36,16 +36,22 @@ def En_Kucuk_Kare(y_egitim,tahmin,sıra,kayip_egitim_toplam=0):
     return kayip_egitim_toplam,kayip_egitim
 
 def gradyan_inisi(agirlik,ogrenme_katsayısı,tahmin,anlik_ornek_sayisi,gercek_deger,bias,toplam_ornek_sayisi):
+        
         kayip=gercek_deger-tahmin
+        #print(f"tahmin:{tahmin} \n gercek deger:{gercek_deger}")
+        
         agirlik_türev = (2/toplam_ornek_sayisi) * X_egitim[anlik_ornek_sayisi]*kayip
         bias_maliyet = (2/toplam_ornek_sayisi) *kayip
-    
-        
+        if gercek_deger==0:
+            hata=0
+        else:
+            hata=kayip/gercek_deger
+        #print(f"hata={kayip/gercek_deger}\n agirlik_türev={agirlik_türev}\n bias_maliyet={bias_maliyet}")
         
         agirlik = agirlik - (ogrenme_katsayısı * agirlik_türev)# stokastik gradyan inisi formülü
         bias = bias - (ogrenme_katsayısı * bias_maliyet)
         #print(f"kayip:{kayip}")
-        return agirlik,bias 
+        return agirlik,bias,hata
 
 
 
@@ -55,14 +61,15 @@ def gradyan_inisi(agirlik,ogrenme_katsayısı,tahmin,anlik_ornek_sayisi,gercek_d
 def lineer_regresyon(X_egitim,y_egitim,ogrenme_katsayısı,iterasyon,bagimsiz_sayi):
     agirliklar=np.array([])# ağırlıkla için dizi oluşturuldu
     for i in range (0,bagimsiz_sayi):
-        agirliklar=np.append(agirliklar,np.random.randint(30))# rastgele ağırlıklar atandı
+        agirliklar=np.append(agirliklar,np.random.randint(10))# rastgele ağırlıklar atandı
         
-        bias=50#bias değeri 50 olarak başlatıldı
+        bias=10#bias değeri 50 olarak başlatıldı
 
     for i in range (1,iterasyon+1):
         tahmin_dizi=np.array([])
         
         for k in range(0,toplam_ornek_sayisi_egitim):
+            
             tahmin=np.dot(X_egitim[k],agirliklar)+bias # regresyon formülü uygulanır bağımsız değişkenler ağırlık ile çarpılır
             
                 
@@ -73,11 +80,19 @@ def lineer_regresyon(X_egitim,y_egitim,ogrenme_katsayısı,iterasyon,bagimsiz_sa
             
             #kayip_egitim_kayit=np.array([])
             #kayip_egitim_kayit[i]=kayip_egitim# her bir iterasyonda dizinin indisi ile aynı sayı olacak şekilde kaydedilir
-            agirliklar,bias=gradyan_inisi(agirlik=agirliklar,ogrenme_katsayısı=ogrenme_katsayısı,tahmin=tahmin,toplam_ornek_sayisi=toplam_ornek_sayisi_egitim,anlik_ornek_sayisi=k,gercek_deger=y_egitim[k],bias=bias)
-        print(f"tahmin={tahmin}\n bagimsiz degiskenler{X_egitim[k]}\n agirliklar={agirliklar} \n\n\n\n gercek={y_egitim[k]}")
+            
+
+            agirliklar,bias,hata=gradyan_inisi(agirlik=agirliklar,ogrenme_katsayısı=ogrenme_katsayısı,tahmin=tahmin,toplam_ornek_sayisi=toplam_ornek_sayisi_egitim,anlik_ornek_sayisi=k,gercek_deger=y_egitim[k],bias=bias)
+            hata_dizi=np.array([])   
 
 
-    return agirliklar,bias    
+               
+            #hata=int(hata*100)
+            #print(i,"-%",hata) 
+        #print(f"tahmin={tahmin}\n bagimsiz degiskenler{X_egitim[k]}\n agirliklar={agirliklar} \n\n\n\n gercek={y_egitim[k]}")
+
+
+    return agirliklar,bias 
 
 
 """def dizi_cikarim(dizi1,dizi2):
@@ -87,5 +102,20 @@ def lineer_regresyon(X_egitim,y_egitim,ogrenme_katsayısı,iterasyon,bagimsiz_sa
           
     return sonuc"""
 
-lineer_regresyon(X_egitim=X_egitim,y_egitim=y_egitim,ogrenme_katsayısı=0.01,iterasyon=1000,bagimsiz_sayi=bagimsiz_sayi)
+agirliklar,bias=lineer_regresyon(X_egitim=X_egitim,y_egitim=y_egitim,ogrenme_katsayısı=0.01,iterasyon=1000,bagimsiz_sayi=bagimsiz_sayi)
+print(len(y_test))
+
+def test(y_test,X_test,agirlik,bias):
+    tahmin=np.array([])
+    dogruluk=np.array([])
+    for k in range(len(y_test)):
+        tahmin=np.append(tahmin,np.dot(X_test[k],agirlik)+bias)
+        dogruluk=np.append(dogruluk,abs((tahmin[k]-y_test[k])/y_test[k])*100)
+        
+    dogruluk_ortalama=np.mean(dogruluk)
+    #print(f"test doğruluğu=%{dogruluk_ortalama}") 
+    print(f"dogruluk:{dogruluk[50]}\n tahmin:{tahmin[50]} \n gercek deger.{y_test[50]}")                       
+    return dogruluk_ortalama
+dogruluk_ortalama=test(y_test=y_test,X_test=X_test,agirlik=agirliklar,bias=bias)   
+
 
