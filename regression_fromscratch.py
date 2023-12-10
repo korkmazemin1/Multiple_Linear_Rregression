@@ -28,10 +28,10 @@ toplam_ornek_sayisi_egitim=400
 toplam_ornek_sayisi_test=100
 
 
-def En_Kucuk_Kare(y_egitim,tahmin,sira,kayip_egitim_toplam=0):
-    kayip_egitim_toplam=(y_egitim[sira]-tahmin)**2# en küçük kareler kayıp fonksiyonu hesaplandı
+def En_Kucuk_Kare(y_egitim,tahmin,sıra,kayip_egitim_toplam=0):
+    kayip_egitim_toplam=(y_egitim[sıra]-tahmin)**2# en küçük kareler kayıp fonksiyonu hesaplandı
     kayip_egitim_toplam+=kayip_egitim_toplam# toplamları alındı
-    kayip_egitim=kayip_egitim_toplam/sira # gradyan düşüşünde uygulanmak için ortalaması hesaplandı
+    kayip_egitim=kayip_egitim_toplam/sıra # gradyan düşüşünde uygulanmak için ortalaması hesaplandı
     
     return kayip_egitim_toplam,kayip_egitim
 

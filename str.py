@@ -1,7 +1,5 @@
 import numpy as np
-agirliklar=np.array([])
-for i in range (0,4):
-        agirliklar=np.append(agirliklar,np.random.randint(30))
-
-
-print(agirliklar)        
+emin=np.array([])
+for i in range(10):
+    emin=np.append(emin,10)
+print(emin)    
