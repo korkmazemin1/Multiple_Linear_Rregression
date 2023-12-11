@@ -103,7 +103,7 @@ X_scaled = scaler.fit_transform(X)
 X_egitim, X_test, y_egitim, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
 
 # Modeli oluştur
-model = LinearRegressionFromScratch(learning_rate=0.0001, num_iterations=2)
+model = LinearRegressionFromScratch(learning_rate=0.0001, num_iterations=8000)
 
 # Veriyi modele uyum sağla
 model.fit(X_egitim, y_egitim)
@@ -117,4 +117,11 @@ tahmin_test = model.predict(X_test)
 #print("Tahminler:", tahmin_test)
 
 yuzde_benzerlik = benzerlik_yuzdesi(y_test, tahmin_test)
-#print(f"Yüzde Benzerlik: {yuzde_benzerlik}%")
+print(f"Yüzde Benzerlik: {yuzde_benzerlik}%")
+
+mse = ((y_test - tahmin_test) ** 2).mean()
+print(f"Ortalama Kare Hata (MSE): {mse}")
+
+mae = np.abs(y_test - tahmin_test).mean()
+print(f"Ortalama Mutlak Hata (MAE): {mae}")
+
