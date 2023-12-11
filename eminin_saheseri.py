@@ -21,7 +21,7 @@ X_scaled = scaler.fit_transform(X)
 bias=0
 kayip_egitim_toplam=0
 
-X_egitim, X_test, y_egitim, y_test = train_test_split(X_scaled, Y, test_size=0.2, random_state=42)
+X_egitim, X_test, y_egitim, y_test = train_test_split(X_scaled, Y, test_size=0.2, random_state=41)
 
 
 bagimsiz_sayi=len(X.iloc[0]) # bağımsız değişkenlerin sayısı elde edildi
@@ -46,7 +46,7 @@ def En_Kucuk_Kare(y_egitim,tahmin,sıra,kayip_egitim_toplam=0):
 
 def gradyan_inisi(agirlik,ogrenme_katsayisi,tahmin,anlik_ornek_sayisi,gercek_deger,bias,toplam_ornek_sayisi,kayip_dizi):
         
-        agirlik_turev = -(2/toplam_ornek_sayisi) * X_egitim*kayip_dizi
+        agirlik_turev = -(2/toplam_ornek_sayisi) * np.dot(X_egitim.T,kayip_dizi)
         bias_maliyet = -(2/toplam_ornek_sayisi) *kayip_dizi
         
         
@@ -58,7 +58,7 @@ def gradyan_inisi(agirlik,ogrenme_katsayisi,tahmin,anlik_ornek_sayisi,gercek_deg
 
 
 def lineer_regresyon(X_egitim,y_egitim,ogrenme_katsayisi,iterasyon,bagimsiz_sayi):
-    agirliklar=np.array([10,10,10,10,10,10])# ağırlıkla için dizi oluşturuldu
+    agirliklar=np.array([20,20,20,20,20,20])# ağırlıkla için dizi oluşturuldu
     bias=20
     """for i in range (0,bagimsiz_sayi):
         agirliklar=np.append(agirliklar,np.random.randint(30))# rastgele ağırlıklar atandı
@@ -90,8 +90,8 @@ def lineer_regresyon(X_egitim,y_egitim,ogrenme_katsayisi,iterasyon,bagimsiz_sayi
           sonuc[i]=dizi1[i]-dizi2[i]
           
     return sonuc"""
-agirliklar,bias=lineer_regresyon(X_egitim=X_egitim,y_egitim=y_egitim,ogrenme_katsayisi=0.0001,iterasyon=10000,bagimsiz_sayi=bagimsiz_sayi)
-
+agirliklar,bias=lineer_regresyon(X_egitim=X_egitim,y_egitim=y_egitim,ogrenme_katsayisi=0.001,iterasyon=1000,bagimsiz_sayi=bagimsiz_sayi)
+#agirliklar,bias=lineer_regresyon(X_egitim=X_egitim,y_egitim=y_egitim,ogrenme_katsayisi=0.0001,iterasyon=1000,bagimsiz_sayi=bagimsiz_sayi)--- bu parametreler ile yüzde 31 alındı
 
 def test(y_test,X_test,agirlik,bias):
     total_hata=0
@@ -105,14 +105,14 @@ def test(y_test,X_test,agirlik,bias):
              
         if y_test[k]==0:
              y_test[k]=1     
-        hata_deger=abs((tahmin[k]-y_test[k])/y_test[k])*100
+        hata_deger=(abs(y_test[k]-tahmin[k])/y_test[k])*100
         print
 
         hata=np.append(hata,hata_deger)
         
         total_hata=hata_deger+total_hata
-    print(f"tahmin:{tahmin[55]}\n gercek deger:{y_test[55]}")
-    print(hata[55])
+    print(f"tahmin:{tahmin[11]}\n gercek deger:{y_test[11]}")
+    print(hata[11])
     print(hata)
     
     ortalama=total_hata/100
