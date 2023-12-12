@@ -15,7 +15,7 @@ Y = veriseti["Total Interactions"].values# bağımlı değişkenler-- tek sütü
 
 
 scaler = StandardScaler() # aykırı değerler yerine aralığı daha sabit verilere geçmek adına bağımsız değişkenler normalize edilir
-#scaler= MinMaxScaler# kodun işleyişine göre diğer bir normalize işlemi uygulanacak
+#scaler= MinMaxScaler() # kodun işleyişine göre diğer bir normalize işlemi uygulanacak
 X_scaled = scaler.fit_transform(X)
 
 bias=0
@@ -90,7 +90,7 @@ def lineer_regresyon(X_egitim,y_egitim,ogrenme_katsayisi,iterasyon,bagimsiz_sayi
           sonuc[i]=dizi1[i]-dizi2[i]
           
     return sonuc"""
-agirliklar,bias=lineer_regresyon(X_egitim=X_egitim,y_egitim=y_egitim,ogrenme_katsayisi=0.001,iterasyon=1000,bagimsiz_sayi=bagimsiz_sayi)
+agirliklar,bias=lineer_regresyon(X_egitim=X_egitim,y_egitim=y_egitim,ogrenme_katsayisi=0.0001,iterasyon=1000,bagimsiz_sayi=bagimsiz_sayi)
 #agirliklar,bias=lineer_regresyon(X_egitim=X_egitim,y_egitim=y_egitim,ogrenme_katsayisi=0.0001,iterasyon=1000,bagimsiz_sayi=bagimsiz_sayi)--- bu parametreler ile yüzde 31 alındı
 
 def test(y_test,X_test,agirlik,bias):
