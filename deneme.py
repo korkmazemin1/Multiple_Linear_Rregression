@@ -1,127 +1,96 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import LabelEncoder
 
-# def En_Kucuk_Kare(y_egitim, tahmin_dizi):
-#     kayip_egitim_toplam = np.sum((y_egitim - tahmin_dizi) ** 2)
-#     kayip_egitim = kayip_egitim_toplam / len(y_egitim)
-#     return kayip_egitim_toplam, kayip_egitim
 
-# def gradyan_inisi(agirlik, ogrenme_katsayisi, tahmin_dizi, X_egitim, y_egitim, bias):
-#     kayip = y_egitim - tahmin_dizi
-#     agirlik_turev = -(2 / len(X_egitim)) * X_egitim.T.dot(kayip)
-#     bias_maliyet = -(2 / len(X_egitim)) * np.sum(kayip)
+# Veri setini yükle
+veriseti = pd.read_csv("dataset_Facebook.csv", sep=";")
 
-#     agirlik = agirlik - ogrenme_katsayisi * agirlik_turev
-#     bias = bias - ogrenme_katsayisi * bias_maliyet
+label_encoder = LabelEncoder()
+veriseti['Type'] = label_encoder.fit_transform(veriseti['Type'])
 
-#     return agirlik, bias
+veriseti.fillna(0, inplace=True)
 
-# def lineer_regresyon(X_egitim, y_egitim, ogrenme_katsayisi, iterasyon):
-#     agirliklar = np.random.randn(X_egitim.shape[1])
-#     bias = 0
+# Bağımsız ve bağımlı değişkenleri seç
+X = veriseti[["Category","Type", "Page total likes", "Post Month", "Post Hour", "Post Weekday", "Paid"]]
+Y = veriseti["Total Interactions"].values
 
-#     for i in range(1, iterasyon + 1):
-#         tahmin_dizi = X_egitim.dot(agirliklar) + bias
-#         kayip_egitim_toplam, kayip_egitim = En_Kucuk_Kare(y_egitim, tahmin_dizi)
-
-#         agirliklar, bias = gradyan_inisi(agirlik=agirliklar, ogrenme_katsayisi=ogrenme_katsayisi,
-#                                          tahmin_dizi=tahmin_dizi, X_egitim=X_egitim, y_egitim=y_egitim, bias=bias)
-
-#         if i % 100 == 0:
-#             print(f"Iterasyon: {i}, Kayıp: {kayip_egitim}")
-
-#     return agirliklar, bias
-
-# # Veri setini yükle
-# veriseti = pd.read_csv("dataset_Facebook.csv", sep=";")
-# veriseti.fillna(0, inplace=True)
-
-# # Bağımsız değişkenleri ve bağımlı değişkeni seç
-# X = veriseti[["Category", "Page total likes", "Post Month", "Post Hour", "Post Weekday", "Paid"]]
-# y = veriseti["Total Interactions"].values
-
-# # Veriyi ölçeklendir
+# Verileri normalize et
 # scaler = StandardScaler()
 # X_scaled = scaler.fit_transform(X)
 
-# # Veriyi eğitim ve test setlerine ayır
-# X_egitim, X_test, y_egitim, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
 
-# # Modeli eğit
-# agirliklar, bias = lineer_regresyon(X_egitim=X_egitim, y_egitim=y_egitim, ogrenme_katsayisi=0.001, iterasyon=3000)
+# Veriyi eğitim ve test setine bölelim
+X_train, X_test, Y_train, Y_test = train_test_split(X_scaled, Y, test_size=0.2, random_state=42)
 
-# # Modeli değerlendir
-# tahmin_dizi_test = X_test.dot(agirliklar) + bias
-# kayip_test_toplam, kayip_test = En_Kucuk_Kare(y_test, tahmin_dizi_test)
-# print("tahmin_dizi_test= ",tahmin_dizi_test)
-# print(f"\nTest Seti Kayıp: {kayip_test}")
+# Gradyan İnişi için gerekli fonksiyonları tanımlayalım
 
+def hypothesis(X, weights):
+    return np.dot(X, weights)
 
+def calculate_cost(X, Y, weights):
+    m = len(Y)
+    predictions = hypothesis(X, weights)
+    cost = (1 / (2 * m)) * np.sum(np.square(predictions - Y))
+    return cost
 
-class LinearRegressionFromScratch:
-    def __init__(self, learning_rate, num_iterations):
-        self.learning_rate = learning_rate
-        self.num_iterations = num_iterations
-        self.weights = None
-        self.bias = None
+def gradient_descent(X, Y, weights, learning_rate, epochs):
+    m = len(Y)
+    cost_history = []
 
-    def fit(self, X, y):
-        m, n = X.shape
-        self.weights = np.zeros(n)
-        self.bias = 0
+    for epoch in range(epochs):
+        predictions = hypothesis(X, weights)
+        errors = predictions - Y
+        gradient = (1 / m) * np.dot(X.T, errors)
+        weights = weights - learning_rate * gradient
 
-        for i in range(self.num_iterations):
-            predictions = np.dot(X, self.weights) + self.bias
-            errors = predictions - y
+        cost = calculate_cost(X, Y, weights)
+        cost_history.append(cost)
 
-            # Gradient descent ile güncelleme
-            self.weights -= (self.learning_rate / m) * np.dot(X.T, errors)
-            print(X)
-            self.bias -= (self.learning_rate / m) * np.sum(errors)
+    return weights, cost_history
 
-    def predict(self, X):
-        return np.dot(X, self.weights) + self.bias
+# İlk ağırlık katsayılarını tanımla
+initial_weights = np.zeros(X_train.shape[1])
 
-def benzerlik_yuzdesi(gercek, tahmin):
-    benzerlik = 1 - np.abs(gercek - tahmin).mean() / gercek.mean()
-    return benzerlik * 100
+# Gradyan İnişi ile modeli eğit
+learning_rate = 0.0001
+epochs = 10000
+trained_weights, cost_history = gradient_descent(X_train, Y_train, initial_weights, learning_rate, epochs)
 
+# Eğitim ve test verileri için Toplam Kare Hatayı (Sum Squared Error) hesapla
+train_error = calculate_cost(X_train, Y_train, trained_weights)
+test_error = calculate_cost(X_test, Y_test, trained_weights)
 
-veriseti = pd.read_csv("dataset_Facebook.csv", sep=";")
-veriseti.fillna(0, inplace=True)
-# Veri setini oluştur
-X = veriseti[["Category", "Page total likes", "Post Month", "Post Hour", "Post Weekday", "Paid"]]
-y = veriseti["Total Interactions"].values
+# Toplam Kare Hata (Sum Squared Error) grafiğini çiz
+plt.plot(range(1, epochs+1), cost_history, color='blue')
+plt.title('Toplam Kare Hata - Gradyan İnişi')
+plt.xlabel('Epochs')
+plt.ylabel('Cost')
+plt.show()
+print("train_error: ",train_error)
+print("test_error:  ",test_error)
+# Eğitim ve test hatalarını çiz
+plt.figure(figsize=(12, 6))
 
-#Veriyi ölçeklendir
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
+plt.subplot(1, 2, 1)
+plt.scatter(Y_train, hypothesis(X_train, trained_weights), color='blue')
+plt.title('Eğitim Seti: Gerçek Değerler vs. Tahminler')
+plt.xlabel('Gerçek Değerler')
+plt.ylabel('Tahminler')
 
-# Veriyi eğitim ve test setlerine ayır
-X_egitim, X_test, y_egitim, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+plt.subplot(1, 2, 2)
+plt.scatter(Y_test, hypothesis(X_test, trained_weights), color='red')
+plt.title('Test Seti: Gerçek Değerler vs. Tahminler')
+plt.xlabel('Gerçek Değerler')
+plt.ylabel('Tahminler')
 
-# Modeli oluştur
-model = LinearRegressionFromScratch(learning_rate=0.0001, num_iterations=8000)
+plt.tight_layout()
+plt.show()
 
-# Veriyi modele uyum sağla
-model.fit(X_egitim, y_egitim)
-
-# Eğitilmiş modelin ağırlıklarını ve bias'ını göster
-#print("Eğitilmiş Ağırlıklar:", model.weights)
-#print("Eğitilmiş Bias:", model.bias)
-
-# Test verisi üzerinde modeli değerlendir
-tahmin_test = model.predict(X_test)
-#print("Tahminler:", tahmin_test)
-
-yuzde_benzerlik = benzerlik_yuzdesi(y_test, tahmin_test)
-print(f"Yüzde Benzerlik: {yuzde_benzerlik}%")
-
-mse = ((y_test - tahmin_test) ** 2).mean()
-print(f"Ortalama Kare Hata (MSE): {mse}")
-
-mae = np.abs(y_test - tahmin_test).mean()
-print(f"Ortalama Mutlak Hata (MAE): {mae}")
-
+# Sonuçları yazdır
+print("Eğitim Hatası (MSE):", train_error)
+print("Test Hatası (MSE):", test_error)
+print("Eğitilmiş Ağırlık Katsayıları:", trained_weights)
