@@ -23,17 +23,20 @@ Y = veriseti["Total Interactions"].values
 # X_scaled = scaler.fit_transform(X)
 
 
+scaler = StandardScaler()
+X_non_categorical = X[["Page total likes", "Post Month", "Post Hour", "Post Weekday", "Paid"]]
+X_non_categorical_scaled = scaler.fit_transform(X_non_categorical)
+X.loc[:, ["Page total likes", "Post Month", "Post Hour", "Post Weekday", "Paid"]] = X_non_categorical_scaled
+X[["Page total likes", "Post Month", "Post Hour", "Post Weekday", "Paid"]] = X_non_categorical_scaled
+
 # Veriyi eğitim ve test setine bölelim
-X_train, X_test, Y_train, Y_test = train_test_split(X_scaled, Y, test_size=0.2, random_state=42)
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
 
 # Gradyan İnişi için gerekli fonksiyonları tanımlayalım
 
-def hypothesis(X, weights):
-    return np.dot(X, weights)
-
 def calculate_cost(X, Y, weights):
     m = len(Y)
-    predictions = hypothesis(X, weights)
+    predictions = np.dot(X, weights)
     cost = (1 / (2 * m)) * np.sum(np.square(predictions - Y))
     return cost
 
@@ -42,7 +45,7 @@ def gradient_descent(X, Y, weights, learning_rate, epochs):
     cost_history = []
 
     for epoch in range(epochs):
-        predictions = hypothesis(X, weights)
+        predictions = np.dot(X, weights)
         errors = predictions - Y
         gradient = (1 / m) * np.dot(X.T, errors)
         weights = weights - learning_rate * gradient
@@ -57,7 +60,7 @@ initial_weights = np.zeros(X_train.shape[1])
 
 # Gradyan İnişi ile modeli eğit
 learning_rate = 0.0001
-epochs = 10000
+epochs = 14000
 trained_weights, cost_history = gradient_descent(X_train, Y_train, initial_weights, learning_rate, epochs)
 
 # Eğitim ve test verileri için Toplam Kare Hatayı (Sum Squared Error) hesapla
@@ -70,19 +73,17 @@ plt.title('Toplam Kare Hata - Gradyan İnişi')
 plt.xlabel('Epochs')
 plt.ylabel('Cost')
 plt.show()
-print("train_error: ",train_error)
-print("test_error:  ",test_error)
 # Eğitim ve test hatalarını çiz
 plt.figure(figsize=(12, 6))
 
 plt.subplot(1, 2, 1)
-plt.scatter(Y_train, hypothesis(X_train, trained_weights), color='blue')
+plt.scatter(Y_train,np.dot(X_train, trained_weights), color='blue')
 plt.title('Eğitim Seti: Gerçek Değerler vs. Tahminler')
 plt.xlabel('Gerçek Değerler')
 plt.ylabel('Tahminler')
 
 plt.subplot(1, 2, 2)
-plt.scatter(Y_test, hypothesis(X_test, trained_weights), color='red')
+plt.scatter(Y_test,np.dot(X_test, trained_weights), color='red')
 plt.title('Test Seti: Gerçek Değerler vs. Tahminler')
 plt.xlabel('Gerçek Değerler')
 plt.ylabel('Tahminler')
