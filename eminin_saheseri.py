@@ -4,11 +4,14 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler,MinMaxScaler
 from tqdm import tqdm
-veriseti = pd.read_csv("dataset_Facebook.csv", sep=";")# veri seti yüklendi
+from sklearn.preprocessing import LabelEncoder
 
+veriseti = pd.read_csv("dataset_Facebook.csv", sep=";")# veri seti yüklendi
+label_encoder = LabelEncoder()
+veriseti['Type'] = label_encoder.fit_transform(veriseti['Type'])
 veriseti.fillna(0, inplace=True)# veri seti içinde az sayıda bulunan kayıp verilere 0 atandı
 
-X = veriseti[["Category", "Page total likes", "Post Month", "Post Hour", "Post Weekday", "Paid"]]# bağımsız değişkenler
+X = veriseti[["Category","Type", "Page total likes", "Post Month", "Post Hour", "Post Weekday", "Paid"]]# bağımsız değişkenler
 
 Y = veriseti["Total Interactions"].values# bağımlı değişkenler-- tek sütün olduğundan daha rahat çağırmak adına tek boyutlu dizi haline getirildi
 
@@ -46,8 +49,8 @@ def En_Kucuk_Kare(y_egitim,tahmin,sıra,kayip_egitim_toplam=0):
 
 def gradyan_inisi(agirlik,ogrenme_katsayisi,tahmin,anlik_ornek_sayisi,gercek_deger,bias,toplam_ornek_sayisi,kayip_dizi):
         
-        agirlik_turev = -(2/toplam_ornek_sayisi) * np.dot(X_egitim.T,kayip_dizi)
-        bias_maliyet = -(2/toplam_ornek_sayisi) *kayip_dizi
+        agirlik_turev = (1/toplam_ornek_sayisi) * np.dot(X_egitim.T,kayip_dizi)
+        bias_maliyet = (1/toplam_ornek_sayisi) *kayip_dizi
         
         
         agirlik = agirlik - (ogrenme_katsayisi * agirlik_turev)# stokastik gradyan inisi formülü
@@ -58,7 +61,7 @@ def gradyan_inisi(agirlik,ogrenme_katsayisi,tahmin,anlik_ornek_sayisi,gercek_deg
 
 
 def lineer_regresyon(X_egitim,y_egitim,ogrenme_katsayisi,iterasyon,bagimsiz_sayi):
-    agirliklar=np.array([20,20,20,20,20,20])# ağırlıkla için dizi oluşturuldu
+    agirliklar=np.array([20,20,20,20,20,20,20])# ağırlıkla için dizi oluşturuldu
     bias=20
     """for i in range (0,bagimsiz_sayi):
         agirliklar=np.append(agirliklar,np.random.randint(30))# rastgele ağırlıklar atandı
@@ -90,7 +93,7 @@ def lineer_regresyon(X_egitim,y_egitim,ogrenme_katsayisi,iterasyon,bagimsiz_sayi
           sonuc[i]=dizi1[i]-dizi2[i]
           
     return sonuc"""
-agirliklar,bias=lineer_regresyon(X_egitim=X_egitim,y_egitim=y_egitim,ogrenme_katsayisi=0.0001,iterasyon=1000,bagimsiz_sayi=bagimsiz_sayi)
+agirliklar,bias=lineer_regresyon(X_egitim=X_egitim,y_egitim=y_egitim,ogrenme_katsayisi=0.0001,iterasyon=14000,bagimsiz_sayi=bagimsiz_sayi)
 #agirliklar,bias=lineer_regresyon(X_egitim=X_egitim,y_egitim=y_egitim,ogrenme_katsayisi=0.0001,iterasyon=1000,bagimsiz_sayi=bagimsiz_sayi)--- bu parametreler ile yüzde 31 alındı
 
 def test(y_test,X_test,agirlik,bias):
@@ -122,5 +125,5 @@ def test(y_test,X_test,agirlik,bias):
               
     return hata
 hata=test(y_test=y_test,X_test=X_test,agirlik=agirliklar,bias=bias)  
-
+print("agirliklar:",agirliklar)
 #print(f"hata_ortalama:{hata_ortalama}")

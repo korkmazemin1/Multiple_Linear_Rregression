@@ -59,8 +59,8 @@ def gradient_descent(X, Y, weights, learning_rate, epochs):
 initial_weights = np.zeros(X_train.shape[1])
 
 # Gradyan İnişi ile modeli eğit
-learning_rate = 0.0001
-epochs = 14000
+learning_rate = 0.00001
+epochs = 20000
 trained_weights, cost_history = gradient_descent(X_train, Y_train, initial_weights, learning_rate, epochs)
 
 # Eğitim ve test verileri için Toplam Kare Hatayı (Sum Squared Error) hesapla
@@ -90,6 +90,15 @@ plt.ylabel('Tahminler')
 
 plt.tight_layout()
 plt.show()
+
+def calculate_percentage_error(Y, predictions):
+    return (100 / np.sum(np.square(Y))) * np.sum(np.square(predictions - Y))
+
+train_percentage_error = calculate_percentage_error(Y_train, np.dot(X_train, trained_weights))
+test_percentage_error = calculate_percentage_error(Y_test, np.dot(X_test, trained_weights))
+
+print("Eğitim Hatası (Percentage Error):", train_percentage_error)
+print("Test Hatası (Percentage Error):", test_percentage_error)
 
 # Sonuçları yazdır
 print("Eğitim Hatası (MSE):", train_error)

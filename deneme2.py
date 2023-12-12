@@ -5,6 +5,7 @@ from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder
 
+
 # Veri setini yükle
 veriseti = pd.read_csv("dataset_Facebook.csv", sep=";")
 
@@ -14,17 +15,25 @@ veriseti['Type'] = label_encoder.fit_transform(veriseti['Type'])
 veriseti.fillna(0, inplace=True)
 
 # Bağımsız ve bağımlı değişkenleri seç
-X = veriseti[["Page total likes"]]  # Only "Page total likes" as the independent variable
+X = veriseti[["Category","Type", "comment", "like", "share", "Paid"]]
 Y = veriseti["Total Interactions"].values
 
-# Veriyi normalize et
+# Verileri normalize et
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
+
+# scaler = StandardScaler()
+# X_non_categorical = X[["Page total likes", "Post Month", "Post Hour", "Post Weekday", "Paid"]]
+# X_non_categorical_scaled = scaler.fit_transform(X_non_categorical)
+# X.loc[:, ["Page total likes", "Post Month", "Post Hour", "Post Weekday", "Paid"]] = X_non_categorical_scaled
+# X[["Page total likes", "Post Month", "Post Hour", "Post Weekday", "Paid"]] = X_non_categorical_scaled
+
 # Veriyi eğitim ve test setine bölelim
-X_train, X_test, Y_train, Y_test = train_test_split(X_scaled, Y, test_size=0.2, random_state=42)
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
 
 # Gradyan İnişi için gerekli fonksiyonları tanımlayalım
+
 def calculate_cost(X, Y, weights):
     m = len(Y)
     predictions = np.dot(X, weights)
@@ -50,8 +59,8 @@ def gradient_descent(X, Y, weights, learning_rate, epochs):
 initial_weights = np.zeros(X_train.shape[1])
 
 # Gradyan İnişi ile modeli eğit
-learning_rate = 0.0001
-epochs = 14000
+learning_rate = 0.00001
+epochs = 20000
 trained_weights, cost_history = gradient_descent(X_train, Y_train, initial_weights, learning_rate, epochs)
 
 # Eğitim ve test verileri için Toplam Kare Hatayı (Sum Squared Error) hesapla
@@ -64,23 +73,32 @@ plt.title('Toplam Kare Hata - Gradyan İnişi')
 plt.xlabel('Epochs')
 plt.ylabel('Cost')
 plt.show()
-
 # Eğitim ve test hatalarını çiz
 plt.figure(figsize=(12, 6))
+
 plt.subplot(1, 2, 1)
-plt.scatter(Y_train, np.dot(X_train, trained_weights), color='blue')
+plt.scatter(Y_train,np.dot(X_train, trained_weights), color='blue')
 plt.title('Eğitim Seti: Gerçek Değerler vs. Tahminler')
 plt.xlabel('Gerçek Değerler')
 plt.ylabel('Tahminler')
 
 plt.subplot(1, 2, 2)
-plt.scatter(Y_test, np.dot(X_test, trained_weights), color='red')
+plt.scatter(Y_test,np.dot(X_test, trained_weights), color='red')
 plt.title('Test Seti: Gerçek Değerler vs. Tahminler')
 plt.xlabel('Gerçek Değerler')
 plt.ylabel('Tahminler')
 
 plt.tight_layout()
 plt.show()
+
+def calculate_percentage_error(Y, predictions):
+    return (100 / np.sum(np.square(Y))) * np.sum(np.square(predictions - Y))
+
+train_percentage_error = calculate_percentage_error(Y_train, np.dot(X_train, trained_weights))
+test_percentage_error = calculate_percentage_error(Y_test, np.dot(X_test, trained_weights))
+
+print("Eğitim Hatası (Percentage Error):", train_percentage_error)
+print("Test Hatası (Percentage Error):", test_percentage_error)
 
 # Sonuçları yazdır
 print("Eğitim Hatası (MSE):", train_error)
