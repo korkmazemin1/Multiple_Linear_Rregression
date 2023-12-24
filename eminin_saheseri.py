@@ -93,7 +93,7 @@ def lineer_regresyon(X_egitim,y_egitim,ogrenme_katsayisi,iterasyon,bagimsiz_sayi
           sonuc[i]=dizi1[i]-dizi2[i]
           
     return sonuc"""
-agirliklar,bias=lineer_regresyon(X_egitim=X_egitim,y_egitim=y_egitim,ogrenme_katsayisi=0.0001,iterasyon=14000,bagimsiz_sayi=bagimsiz_sayi)
+agirliklar,bias=lineer_regresyon(X_egitim=X_egitim,y_egitim=y_egitim,ogrenme_katsayisi=0.001,iterasyon=2000,bagimsiz_sayi=bagimsiz_sayi)
 #agirliklar,bias=lineer_regresyon(X_egitim=X_egitim,y_egitim=y_egitim,ogrenme_katsayisi=0.0001,iterasyon=1000,bagimsiz_sayi=bagimsiz_sayi)--- bu parametreler ile yüzde 31 alındı
 
 def test(y_test,X_test,agirlik,bias):
@@ -117,13 +117,22 @@ def test(y_test,X_test,agirlik,bias):
     print(f"tahmin:{tahmin[11]}\n gercek deger:{y_test[11]}")
     print(hata[11])
     print(hata)
-    
-    ortalama=total_hata/100
-    print(f"ortalama:{ortalama}")
+    return hata
+
+
 
     
               
-    return hata
+    
 hata=test(y_test=y_test,X_test=X_test,agirlik=agirliklar,bias=bias)  
 print("agirliklar:",agirliklar)
 #print(f"hata_ortalama:{hata_ortalama}")
+
+def calculate_percentage_error(Y, tahmin):
+    return (100 / np.sum(np.square(Y))) * np.sum(np.square(tahmin - Y))
+
+train_percentage_error = calculate_percentage_error(y_egitim, np.dot(X_egitim, agirliklar))
+test_percentage_error = calculate_percentage_error(y_test, np.dot(X_test, agirliklar))
+
+print("Eğitim Hatası (Percentage Error):", train_percentage_error)
+print("Test Hatası (Percentage Error):", test_percentage_error)
