@@ -11,21 +11,18 @@ label_encoder = LabelEncoder()
 veriseti['Type'] = label_encoder.fit_transform(veriseti['Type'])
 veriseti.fillna(0, inplace=True)# veri seti içinde az sayıda bulunan kayıp verilere 0 atandı
 
-X = veriseti[["Category","Type", "Page total likes", "Post Month", "Post Hour", "Post Weekday", "Paid"]]# bağımsız değişkenler
+X = veriseti[["Category","Type", "comment", "like", "share", "Paid"]]# bağımsız değişkenler
 
 Y = veriseti["Total Interactions"].values# bağımlı değişkenler-- tek sütün olduğundan daha rahat çağırmak adına tek boyutlu dizi haline getirildi
 
 
-
 scaler = StandardScaler() # aykırı değerler yerine aralığı daha sabit verilere geçmek adına bağımsız değişkenler normalize edilir
-#scaler= MinMaxScaler() # kodun işleyişine göre diğer bir normalize işlemi uygulanacak
 X_scaled = scaler.fit_transform(X)
 
 bias=0
 kayip_egitim_toplam=0
 
 X_egitim, X_test, y_egitim, y_test = train_test_split(X_scaled, Y, test_size=0.2, random_state=41)
-
 
 bagimsiz_sayi=len(X.iloc[0]) # bağımsız değişkenlerin sayısı elde edildi
 toplam_ornek_sayisi_egitim=400
@@ -36,9 +33,6 @@ def kayip_hesaplayici(anlik_ornek_sayisi,tahmin,gercek_deger):
     for k in range(anlik_ornek_sayisi):
         kayip=abs(tahmin[k]-gercek_deger[k])
 
-          
-     
-     
 
 def En_Kucuk_Kare(y_egitim,tahmin,sıra,kayip_egitim_toplam=0):
     kayip_egitim_toplam=(y_egitim[sıra]-tahmin)**2# en küçük kareler kayıp fonksiyonu hesaplandı
@@ -58,15 +52,9 @@ def gradyan_inisi(agirlik,ogrenme_katsayisi,tahmin,anlik_ornek_sayisi,gercek_deg
         #print(f"kayip:{kayip}")
         return agirlik,bias 
 
-
-
 def lineer_regresyon(X_egitim,y_egitim,ogrenme_katsayisi,iterasyon,bagimsiz_sayi):
-    agirliklar=np.array([20,20,20,20,20,20,20])# ağırlıkla için dizi oluşturuldu
+    agirliklar=np.array([0,0,0,0,0,0])# ağırlıkla için dizi oluşturuldu
     bias=20
-    """for i in range (0,bagimsiz_sayi):
-        agirliklar=np.append(agirliklar,np.random.randint(30))# rastgele ağırlıklar atandı
-        
-        bias=50#bias değeri 50 olarak başlatıldı"""
 
     for i in tqdm(range (1,iterasyon+1)):
         
@@ -86,14 +74,8 @@ def lineer_regresyon(X_egitim,y_egitim,ogrenme_katsayisi,iterasyon,bagimsiz_sayi
 
     return agirliklar,bias    
 
-
-"""def dizi_cikarim(dizi1,dizi2):
-    sonuc=np.array([])
-    for i in range(0,len(dizi1)-1):
-          sonuc[i]=dizi1[i]-dizi2[i]
-          
-    return sonuc"""
-agirliklar,bias=lineer_regresyon(X_egitim=X_egitim,y_egitim=y_egitim,ogrenme_katsayisi=0.001,iterasyon=2000,bagimsiz_sayi=bagimsiz_sayi)
+iterasyon=1000
+agirliklar,bias=lineer_regresyon(X_egitim=X_egitim,y_egitim=y_egitim,ogrenme_katsayisi=0.001,iterasyon=iterasyon,bagimsiz_sayi=bagimsiz_sayi)
 #agirliklar,bias=lineer_regresyon(X_egitim=X_egitim,y_egitim=y_egitim,ogrenme_katsayisi=0.0001,iterasyon=1000,bagimsiz_sayi=bagimsiz_sayi)--- bu parametreler ile yüzde 31 alındı
 
 def test(y_test,X_test,agirlik,bias):
@@ -121,7 +103,6 @@ def test(y_test,X_test,agirlik,bias):
 
 
 
-    
               
     
 hata=test(y_test=y_test,X_test=X_test,agirlik=agirliklar,bias=bias)  
@@ -136,3 +117,28 @@ test_percentage_error = calculate_percentage_error(y_test, np.dot(X_test, agirli
 
 print("Eğitim Hatası (Percentage Error):", train_percentage_error)
 print("Test Hatası (Percentage Error):", test_percentage_error)
+
+# Toplam Kare Hata (Sum Squared Error) grafiğini çiz
+plt.plot(range(1, iterasyon+1), hata, color='blue')
+plt.title('Toplam Kare Hata - Gradyan İnişi')
+plt.xlabel('Epochs')
+plt.ylabel('Cost')
+plt.show()
+# Eğitim ve test hatalarını çiz
+plt.figure(figsize=(12, 6))
+
+plt.subplot(1, 2, 1)
+plt.scatter(y_egitim,np.dot(X_egitim, agirliklar), color='blue')
+plt.title('Eğitim Seti: Gerçek Değerler vs. Tahminler')
+plt.xlabel('Gerçek Değerler')
+plt.ylabel('Tahminler')
+
+plt.subplot(1, 2, 2)
+plt.scatter(y_test,np.dot(X_test, agirliklar), color='red')
+plt.title('Test Seti: Gerçek Değerler vs. Tahminler')
+plt.xlabel('Gerçek Değerler')
+plt.ylabel('Tahminler')
+
+plt.tight_layout()
+plt.show()
+    

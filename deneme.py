@@ -11,23 +11,16 @@ veriseti = pd.read_csv("dataset_Facebook.csv", sep=";")
 
 label_encoder = LabelEncoder()
 veriseti['Type'] = label_encoder.fit_transform(veriseti['Type'])
-
 veriseti.fillna(0, inplace=True)
 
 # Bağımsız ve bağımlı değişkenleri seç
-X = veriseti[["Category","Type", "Page total likes", "Post Month", "Post Hour", "Post Weekday", "Paid"]]
+X = veriseti[["Category","Type", "comment", "like", "share", "Paid"]]
 Y = veriseti["Total Interactions"].values
 
 # Verileri normalize et
-# scaler = StandardScaler()
-# X_scaled = scaler.fit_transform(X)
-
-
 scaler = StandardScaler()
-X_non_categorical = X[["Page total likes", "Post Month", "Post Hour", "Post Weekday", "Paid"]]
-X_non_categorical_scaled = scaler.fit_transform(X_non_categorical)
-X.loc[:, ["Page total likes", "Post Month", "Post Hour", "Post Weekday", "Paid"]] = X_non_categorical_scaled
-X[["Page total likes", "Post Month", "Post Hour", "Post Weekday", "Paid"]] = X_non_categorical_scaled
+X_scaled = scaler.fit_transform(X)
+
 
 # Veriyi eğitim ve test setine bölelim
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
@@ -59,8 +52,8 @@ def gradient_descent(X, Y, weights, learning_rate, epochs):
 initial_weights = np.zeros(X_train.shape[1])
 
 # Gradyan İnişi ile modeli eğit
-learning_rate = 0.001
-epochs = 2000
+learning_rate = 0.00001
+epochs = 1000
 trained_weights, cost_history = gradient_descent(X_train, Y_train, initial_weights, learning_rate, epochs)
 
 # Eğitim ve test verileri için Toplam Kare Hatayı (Sum Squared Error) hesapla
@@ -92,13 +85,10 @@ plt.tight_layout()
 plt.show()
 
 def calculate_percentage_error(Y, predictions):
-
     return (100 / np.sum(np.square(Y))) * np.sum(np.square(predictions - Y))
-    
 
 train_percentage_error = calculate_percentage_error(Y_train, np.dot(X_train, trained_weights))
 test_percentage_error = calculate_percentage_error(Y_test, np.dot(X_test, trained_weights))
-
 
 print("Eğitim Hatası (Percentage Error):", train_percentage_error)
 print("Test Hatası (Percentage Error):", test_percentage_error)
@@ -107,4 +97,3 @@ print("Test Hatası (Percentage Error):", test_percentage_error)
 print("Eğitim Hatası (MSE):", train_error)
 print("Test Hatası (MSE):", test_error)
 print("Eğitilmiş Ağırlık Katsayıları:", trained_weights)
-
