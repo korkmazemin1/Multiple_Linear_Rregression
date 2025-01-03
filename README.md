@@ -37,12 +37,12 @@ Here's an example of the model fitting data:
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/your-username/multiple-linear-regression.git
+   git clone https://github.com/your-username/Multiple-Linear-Regression.git
    ```
 
 2. **Navigate to the Directory**:
    ```bash
-   cd multiple-linear-regression
+   cd Multiple-Linear-Regression
    ```
 
 3. **Install Requirements**:
@@ -108,12 +108,12 @@ Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \dots + \beta_n X_n + \epsilon
 
 1. **Depoyu Klonlayın**:
    ```bash
-   git clone https://github.com/your-username/multiple-linear-regression.git
+   git clone https://github.com/your-username/Multiple-Linear-Regression.git
    ```
 
 2. **Dizine Geçin**:
    ```bash
-   cd multiple-linear-regression
+   cd Multiple-Linear-Regression
    ```
 
 3. **Gereksinimleri Yükleyin**:
