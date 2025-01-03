@@ -31,8 +31,6 @@ Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \dots + \beta_n X_n + \epsilon
 
 Here's an example of the model fitting data:
 
-![Model Fit Example](images/model_fit_example.png)
-
 ---
 
 ## 🚀 How to Run
@@ -103,10 +101,6 @@ Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \dots + \beta_n X_n + \epsilon
 ---
 
 ## 📊 Örnek Çıktı
-
-Modelin veriye nasıl uyduğuna dair bir örnek:
-
-![Model Uyum Örneği](images/model_fit_example.png)
 
 ---
 
